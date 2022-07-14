@@ -1,7 +1,6 @@
 'use strict';
 
-const elasticsearch = require('elasticsearch');
-const fs = require('fs');
+const connectionHelper = require('./helpers/connectionHelper');
 const SchemaCreator = require('./SchemaCreator');
 const inferSchemaService = require('./helpers/inferSchemaService');
 const versions = require('../package.json').contributes.target.versions;
@@ -9,68 +8,27 @@ const versions = require('../package.json').contributes.target.versions;
 const MAX_DOCUMENTS = 30000;
 
 let connectionParams = {};
-let saveConnectionInfo = {};
-
-let _client = null;
 
 module.exports = {
 	connect: function(connectionInfo, logger, cb){
 		logger.clear();
 		logger.log('info', connectionInfo, 'Connection information', connectionInfo.hiddenKeys);
-		
-		let authString = "";
 
-		if (_client !== null) {
-			return cb(null, _client);
+		try {
+			const { _client, connectionParams } = connectionHelper.connect(connectionInfo);
+
+			if (connectionParams) {
+				connectionParams = connectionParams;
+			}
+
+			cb(null, _client);
+		} catch (error) {
+			cb(error);
 		}
-
-		if (connectionInfo.username) {
-			authString = connectionInfo.username;
-		}
-
-		if (connectionInfo.password) {
-			authString += ':' + connectionInfo.password;
-		}
-
-		if (connectionInfo.connectionType === 'Direct connection') {
-			connectionParams.host = {
-				protocol: connectionInfo.protocol,
-				host: connectionInfo.host,
-				port: connectionInfo.port,
-				path: connectionInfo.path,
-				auth: authString
-			};
-		} else if (connectionInfo.connectionType === 'Replica set or Sharded cluster') {
-			connectionParams.hosts = connectionInfo.hosts.map(socket => {
-				return {
-					host: socket.host,
-					port: socket.port,
-					protocol: connectionInfo.protocol,
-					auth: authString
-				};
-			});
-		} else {
-			cb('Invalid connection parameters');
-		}
-
-		if (connectionInfo.is_ssl) {
-			connectionParams.ssl = {
-				ca: fs.readFileSync(connectionInfo.ca),
-				rejectUnauthorized: connectionInfo.rejectUnauthorized
-			};
-		}
-
-		_client = new elasticsearch.Client(connectionParams);
-
-		cb(null, _client);
 	},
 
 	disconnect: function(connectionInfo, logger, cb){
-		if (_client) {
-			_client.close();
-			_client = null;
-		}
-		connectionParams = {};
+		connectionHelper.disconnect();
 		cb();
 	},
 

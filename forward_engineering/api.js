@@ -1,5 +1,6 @@
 const helper = require('../helper/helper.js');
 const schemaHelper = require('../helper/schemaHelper.js');
+const applyToInstanceHelper = require('./helpers/applyToInstanceHelper');
 
 module.exports = {
 	generateScript(data, logger, cb) {
@@ -334,7 +335,11 @@ module.exports = {
 		);
 
 		return { path: pathName };
-	}
+	},
+	
+	applyToInstance: applyToInstanceHelper.applyToInstance,
+
+	testConnection: applyToInstanceHelper.testConnection,
 };
 
 const getPriority = (a, b) => {

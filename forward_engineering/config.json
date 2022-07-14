@@ -3,9 +3,27 @@
 	"filterName": "Plain text",
 	"namePrefix": "Elasticsearch Mapping",
 	"hasUpdateScript": true,
+	"applyScriptToInstance": true,
+	"applyToInstanceSettings": {
+		"generateSamplesInBulk": true
+	},
 	"level": {
 		"entity": true,
 		"container": true
+	},
+	"additionalOptions": [
+		{
+			"id": "INCLUDE_SAMPLES",
+			"value": true,
+			"name": "Include sample data",
+			"align": "right"
+		}
+	],
+	"numberOfDocumentsOptions": {
+		"id": "numberOfDocuments",
+		"value": 1,
+		"minValue": 1,
+		"maxValue": 10000000
 	},
 	"resolvedDefinitions": true
 }
